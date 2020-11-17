@@ -8,6 +8,52 @@
 
 import UIKit
 
+class PlusView: UIView {
+    let someControl = SomeControl()
+    let imageView = UIImageView(image: UIImage(named: "Path", in: Bundle(for: NSClassFromString("WSTagsField.WSTagsField")!), with: nil))
+    var onClick: () -> Void {
+        set { someControl.onClick = newValue }
+        get { someControl.onClick }
+    }
+    override init(frame: CGRect) {
+        super.init(frame: frame)
+        addSubview(someControl)
+        addSubview(imageView)
+        backgroundColor = UIColor(red: 0, green: 0.808, blue: 0.081, alpha: 1).withAlphaComponent(0.1)
+//        clipsToBounds = true
+    }
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+
+    override var frame: CGRect {
+        didSet {
+            someControl.frame = frame
+            someControl.frame.origin.x = 0
+            someControl.frame.origin.y = 0
+            var bounds = frame.inset(by: .init(top: 6, left: 6, bottom: 6, right: 6))
+            bounds.origin.x = frame.width / 4
+            bounds.origin.y = frame.height / 4
+            imageView.frame = bounds
+            layer.cornerRadius = min(frame.height, frame.width) / 2
+        }
+    }
+
+    class SomeControl: UIControl {
+        var onClick: () -> Void = { }
+        init() {
+            super.init(frame: .zero)
+            addTarget(self, action: #selector(touchUp), for: .touchUpInside)
+        }
+        required init?(coder: NSCoder) {
+            fatalError("init(coder:) has not been implemented")
+        }
+        @objc private func touchUp() {
+            onClick()
+        }
+    }
+}
+
 public struct WSTagAcceptOption: OptionSet {
     public let rawValue: Int
 
@@ -20,10 +66,12 @@ public struct WSTagAcceptOption: OptionSet {
     public static let  space   = WSTagAcceptOption(rawValue: 1 << 2)
 }
 
+@available(iOSApplicationExtension 13.0, *)
 @IBDesignable
 open class WSTagsField: UIScrollView {
 
     public let textField = BackspaceDetectingTextField()
+    let plusButton = PlusView()
 
     /// Dedicated text field delegate.
     open weak var textDelegate: UITextFieldDelegate?
@@ -67,7 +115,15 @@ open class WSTagsField: UIScrollView {
             tagViews.forEach { $0.displayDelimiter = self.isDelimiterVisible ? self.delimiter : "" }
         }
     }
-    
+    open var acceptDeletingTags: Bool = true
+    open var plusButtonHidden: Bool {
+        get {
+            return plusButton.isHidden
+        }
+        set {
+            plusButton.isHidden = newValue
+        }
+    }
     /// Whether the text field should tokenize strings automatically when the keyboard is dismissed. 
     @IBInspectable open var shouldTokenizeAfterResigningFirstResponder: Bool = false
 
@@ -90,6 +146,18 @@ open class WSTagsField: UIScrollView {
     @IBInspectable open var cornerRadius: CGFloat = 3.0 {
         didSet {
             tagViews.forEach { $0.cornerRadius = self.cornerRadius }
+        }
+    }
+    
+    open var cornerCurve: CALayerCornerCurve = .circular {
+        didSet {
+            tagViews.forEach { $0.layer.cornerCurve = self.cornerCurve }
+        }
+    }
+    
+    open var tagBackgroundColor: UIColor = .clear {
+        didSet {
+            tagViews.forEach { $0.tagBackgroundColor = tagBackgroundColor }
         }
     }
 
@@ -118,7 +186,6 @@ open class WSTagsField: UIScrollView {
         }
     }
 
-    @available(iOS 10.0, *)
     @available(*, deprecated, message: "use 'textField.fieldTextContentType' directly.")
     open var fieldTextContentType: UITextContentType! {
         set {
@@ -169,11 +236,16 @@ open class WSTagsField: UIScrollView {
         }
     }
 
-    @IBInspectable open var readOnly: Bool = false {
+    @IBInspectable open var readOnly: Bool = true {
         didSet {
             unselectAllTagViewsAnimated()
             textField.isEnabled = !readOnly
-            repositionViews()
+            UIView.animate(withDuration: 0.5) { [weak self] in
+                self?.repositionViews()
+            }
+            if !readOnly {
+                beginEditing()
+            }
         }
     }
 
@@ -389,6 +461,7 @@ open class WSTagsField: UIScrollView {
         let tagView = WSTagView(tag: tag)
         tagView.font = self.font
         tagView.tintColor = self.tintColor
+        tagView.tagBackgroundColor = self.tagBackgroundColor
         tagView.textColor = self.textColor
         tagView.selectedColor = self.selectedColor
         tagView.selectedTextColor = self.selectedTextColor
@@ -475,7 +548,7 @@ open class WSTagsField: UIScrollView {
 
             self.textField.text = ""
             onTextFieldDidChange(self.textField)
-
+            readOnly = true
             return tag
         }
         return nil
@@ -517,7 +590,7 @@ open class WSTagsField: UIScrollView {
     }
 
     open func selectTagView(_ tagView: WSTagView, animated: Bool = false) {
-        if self.readOnly {
+        if !self.acceptDeletingTags {
             return
         }
 
@@ -623,6 +696,10 @@ extension WSTagsField {
         selectedTextColor = .black
 
         clipsToBounds = true
+        plusButton.onClick = { [weak self] in
+            self?.readOnly = false
+        }
+        addSubview(plusButton)
 
         textField.backgroundColor = .clear
         textField.autocorrectionType = UITextAutocorrectionType.no
@@ -651,24 +728,26 @@ extension WSTagsField {
         }
 
         textField.addTarget(self, action: #selector(onTextFieldDidChange(_:)), for: UIControl.Event.editingChanged)
-
+        
         repositionViews()
     }
 
     fileprivate func calculateContentHeight(layoutWidth: CGFloat) -> CGFloat {
         var totalRect: CGRect = .null
-        enumerateItemRects(layoutWidth: layoutWidth) { (_, tagRect: CGRect?, textFieldRect: CGRect?) in
+        enumerateItemRects(layoutWidth: layoutWidth) { (_, tagRect: CGRect?, textFieldRect: CGRect?, plusButtonRect: CGRect?) in
             if let tagRect = tagRect {
                 totalRect = tagRect.union(totalRect)
             }
             else if let textFieldRect = textFieldRect {
                 totalRect = textFieldRect.union(totalRect)
+            } else if let plusButtonRect = plusButtonRect {
+                totalRect = plusButtonRect.union(totalRect)
             }
         }
         return totalRect.height
     }
 
-    fileprivate func enumerateItemRects(layoutWidth: CGFloat, using closure: (_ tagView: WSTagView?, _ tagRect: CGRect?, _ textFieldRect: CGRect?) -> Void) {
+    fileprivate func enumerateItemRects(layoutWidth: CGFloat, using closure: (_ tagView: WSTagView?, _ tagRect: CGRect?, _ textFieldRect: CGRect?, _ plusButtonRect: CGRect?) -> Void) {
         if layoutWidth == 0 {
             return
         }
@@ -694,7 +773,7 @@ extension WSTagsField {
             // Center our tagView vertically within STANDARD_ROW_HEIGHT
             tagRect.origin.y = curY + ((Constants.STANDARD_ROW_HEIGHT - tagRect.height)/2.0)
 
-            closure(tagView, tagRect, nil)
+            closure(tagView, tagRect, nil, nil)
 
             curX = tagRect.maxX + self.spaceBetweenTags
         }
@@ -703,26 +782,35 @@ extension WSTagsField {
         curX += max(0, Constants.TEXT_FIELD_HSPACE - self.spaceBetweenTags)
         var availableWidthForTextField: CGFloat = maxWidth - curX
 
-        if textField.isEnabled {
-            var textFieldRect = CGRect.zero
-            textFieldRect.size.height = Constants.STANDARD_ROW_HEIGHT
-
-            if availableWidthForTextField < Constants.MINIMUM_TEXTFIELD_WIDTH {
-                // If in the future we add more UI elements below the tags,
-                // isOnFirstLine will be useful, and this calculation is important.
-                // So leaving it set here, and marking the warning to ignore it
-                curX = 0 + Constants.TEXT_FIELD_HSPACE
-                curY += Constants.STANDARD_ROW_HEIGHT + spaceBetweenLines
-                totalHeight += Constants.STANDARD_ROW_HEIGHT
-                // Adjust the width
-                availableWidthForTextField = maxWidth - curX
-            }
-            textFieldRect.origin.y = curY
-            textFieldRect.origin.x = curX
-            textFieldRect.size.width = availableWidthForTextField
-
-            closure(nil, nil, textFieldRect)
+        var textFieldRect = CGRect.zero
+        textFieldRect.size.height = Constants.STANDARD_ROW_HEIGHT
+        
+        if availableWidthForTextField < Constants.MINIMUM_TEXTFIELD_WIDTH {
+            // If in the future we add more UI elements below the tags,
+            // isOnFirstLine will be useful, and this calculation is important.
+            // So leaving it set here, and marking the warning to ignore it
+            curX = 0 + Constants.TEXT_FIELD_HSPACE
+            curY += Constants.STANDARD_ROW_HEIGHT + spaceBetweenLines
+            totalHeight += Constants.STANDARD_ROW_HEIGHT
+            // Adjust the width
+            availableWidthForTextField = maxWidth - curX
         }
+        textFieldRect.origin.y = curY
+        textFieldRect.origin.x = curX
+        textFieldRect.size.width = availableWidthForTextField
+        
+        closure(nil, nil, textFieldRect, nil)
+        var plusButtonRect = CGRect(x: 0, y: 0, width: 22, height: 22)
+        var availableWidthForPlusButton = maxWidth - curX
+        if availableWidthForPlusButton < plusButtonRect.width {
+            curX = 0
+            curY += Constants.STANDARD_ROW_HEIGHT + spaceBetweenLines
+            totalHeight += Constants.STANDARD_ROW_HEIGHT
+            availableWidthForPlusButton = maxWidth - curX
+        }
+        plusButtonRect.origin.y = curY + ((Constants.STANDARD_ROW_HEIGHT - plusButtonRect.height)/2.0)
+        plusButtonRect.origin.x = curX
+        closure(nil, nil, nil, plusButtonRect)
     }
 
     fileprivate func repositionViews() {
@@ -731,7 +819,7 @@ extension WSTagsField {
         }
 
         var contentRect: CGRect = .null
-        enumerateItemRects(layoutWidth: self.bounds.width) { (tagView: WSTagView?, tagRect: CGRect?, textFieldRect: CGRect?) in
+        enumerateItemRects(layoutWidth: self.bounds.width) { (tagView: WSTagView?, tagRect: CGRect?, textFieldRect: CGRect?, plusButtonRect: CGRect?) in
             if let tagRect = tagRect, let tagView = tagView {
                 tagView.frame = tagRect
                 tagView.setNeedsLayout()
@@ -740,10 +828,22 @@ extension WSTagsField {
             else if let textFieldRect = textFieldRect {
                 textField.frame = textFieldRect
                 contentRect = textFieldRect.union(contentRect)
+            } else if let plusButtonRect = plusButtonRect {
+                plusButton.frame = plusButtonRect
+                contentRect = plusButtonRect.union(contentRect)
             }
         }
 
-        textField.isHidden = !textField.isEnabled
+        if !readOnly {
+            plusButton.layer.opacity = 0
+            textField.layer.opacity = 1
+        } else {
+            textField.layer.opacity = 0
+            plusButton.layer.opacity = 1
+        }
+
+//        textField.isHidden = !textField.isEnabled
+//        plusButton.isHidden = textField.isEnabled
 
         invalidateIntrinsicContentSize()
         let newIntrinsicContentHeight = intrinsicContentSize.height

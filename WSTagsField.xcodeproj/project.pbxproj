@@ -9,6 +9,7 @@
 /* Begin PBXBuildFile section */
 		125AC6EC1F14D13F00137101 /* BackspaceDetectingTextField.swift in Sources */ = {isa = PBXBuildFile; fileRef = 125AC6EB1F14D13F00137101 /* BackspaceDetectingTextField.swift */; };
 		125AC6EF1F14D6A600137101 /* Constants.swift in Sources */ = {isa = PBXBuildFile; fileRef = 125AC6EE1F14D6A600137101 /* Constants.swift */; };
+		A5F0081A256454BB0023A6FB /* Media.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = A5F00819256454BB0023A6FB /* Media.xcassets */; };
 		D77F81B31D2A957400E6FF3E /* WSTag.swift in Sources */ = {isa = PBXBuildFile; fileRef = D77F81B01D2A957400E6FF3E /* WSTag.swift */; };
 		D77F81B41D2A957400E6FF3E /* WSTagsField.swift in Sources */ = {isa = PBXBuildFile; fileRef = D77F81B11D2A957400E6FF3E /* WSTagsField.swift */; };
 		D77F81B51D2A957400E6FF3E /* WSTagView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D77F81B21D2A957400E6FF3E /* WSTagView.swift */; };
@@ -30,6 +31,7 @@
 /* Begin PBXFileReference section */
 		125AC6EB1F14D13F00137101 /* BackspaceDetectingTextField.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = BackspaceDetectingTextField.swift; path = Source/BackspaceDetectingTextField.swift; sourceTree = SOURCE_ROOT; };
 		125AC6EE1F14D6A600137101 /* Constants.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = Constants.swift; path = Source/Constants.swift; sourceTree = SOURCE_ROOT; };
+		A5F00819256454BB0023A6FB /* Media.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Media.xcassets; sourceTree = "<group>"; };
 		D77F81B01D2A957400E6FF3E /* WSTag.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = WSTag.swift; path = Source/WSTag.swift; sourceTree = SOURCE_ROOT; };
 		D77F81B11D2A957400E6FF3E /* WSTagsField.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = WSTagsField.swift; path = Source/WSTagsField.swift; sourceTree = SOURCE_ROOT; };
 		D77F81B21D2A957400E6FF3E /* WSTagView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = WSTagView.swift; path = Source/WSTagView.swift; sourceTree = SOURCE_ROOT; };
@@ -87,6 +89,7 @@
 				D77F81B01D2A957400E6FF3E /* WSTag.swift */,
 				D78C9FF21D2A6AFD004F4BFF /* WSTagsField.h */,
 				D77F81B11D2A957400E6FF3E /* WSTagsField.swift */,
+				A5F00819256454BB0023A6FB /* Media.xcassets */,
 				D77F81B21D2A957400E6FF3E /* WSTagView.swift */,
 			);
 			path = WSTagsField;
@@ -196,6 +199,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				A5F0081A256454BB0023A6FB /* Media.xcassets in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -306,7 +310,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 9.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 13.0;
 				MTL_ENABLE_DEBUG_INFO = YES;
 				ONLY_ACTIVE_ARCH = YES;
 				SDKROOT = iphoneos;
@@ -363,7 +367,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 9.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 13.0;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				SDKROOT = iphoneos;
 				SHARED_BUILD_NUMBER = 2020.7.31.11.47;
@@ -390,6 +394,7 @@
 				DYLIB_INSTALL_NAME_BASE = "@rpath";
 				INFOPLIST_FILE = WSTagsField/Info.plist;
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
+				IPHONEOS_DEPLOYMENT_TARGET = 13.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = co.whitesmith.WSTagsField;
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -412,6 +417,7 @@
 				DYLIB_INSTALL_NAME_BASE = "@rpath";
 				INFOPLIST_FILE = WSTagsField/Info.plist;
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
+				IPHONEOS_DEPLOYMENT_TARGET = 13.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = co.whitesmith.WSTagsField;
 				PRODUCT_NAME = "$(TARGET_NAME)";
