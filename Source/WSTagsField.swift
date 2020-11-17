@@ -116,6 +116,7 @@ open class WSTagsField: UIScrollView {
         }
     }
     open var acceptDeletingTags: Bool = true
+    open var overridenPlusButtonOnClick: (() -> Void)?
     open var plusButtonHidden: Bool {
         get {
             return plusButton.isHidden
@@ -697,7 +698,11 @@ extension WSTagsField {
 
         clipsToBounds = true
         plusButton.onClick = { [weak self] in
-            self?.readOnly = false
+            if self?.overridenPlusButtonOnClick != nil {
+                self?.overridenPlusButtonOnClick?()
+            } else {
+                self?.readOnly = false
+            }
         }
         addSubview(plusButton)
 
