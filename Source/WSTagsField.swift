@@ -8,25 +8,25 @@
 
 import UIKit
 
-class PlusView: UIView {
-    let someControl = SomeControl()
-    let imageView = UIImageView(image: UIImage(named: "Path", in: Bundle(for: NSClassFromString("WSTagsField.WSTagsField")!), with: nil))
-    var onClick: () -> Void {
+public class WSPlusView: UIView {
+    public let someControl = WSSomeControl()
+    public let imageView = UIImageView(image: UIImage(named: "Path", in: Bundle(for: NSClassFromString("WSTagsField.WSTagsField")!), with: nil))
+    public var onClick: () -> Void {
         set { someControl.onClick = newValue }
         get { someControl.onClick }
     }
-    override init(frame: CGRect) {
+    public override init(frame: CGRect) {
         super.init(frame: frame)
         addSubview(someControl)
         addSubview(imageView)
         backgroundColor = UIColor(red: 0, green: 0.808, blue: 0.081, alpha: 1).withAlphaComponent(0.1)
 //        clipsToBounds = true
     }
-    required init?(coder: NSCoder) {
+    public required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
 
-    override var frame: CGRect {
+    public override var frame: CGRect {
         didSet {
             someControl.frame = frame
             someControl.frame.origin.x = 0
@@ -39,7 +39,7 @@ class PlusView: UIView {
         }
     }
 
-    class SomeControl: UIControl {
+    public class WSSomeControl: UIControl {
         var onClick: () -> Void = { }
         init() {
             super.init(frame: .zero)
@@ -71,7 +71,7 @@ public struct WSTagAcceptOption: OptionSet {
 open class WSTagsField: UIScrollView {
 
     public let textField = BackspaceDetectingTextField()
-    let plusButton = PlusView()
+    public let plusButton = WSPlusView()
 
     /// Dedicated text field delegate.
     open weak var textDelegate: UITextFieldDelegate?
